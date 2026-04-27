@@ -80,13 +80,6 @@ cinematic_intro.html
 
 ---
 
-## ⚠️ Important Notes
-
-* Do **not upload**:
-
-  * `node_modules/`
-  * `.env` files
-
 * Install dependencies using:
 
 ```bash
