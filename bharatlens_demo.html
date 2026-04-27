@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BharatLens — AI Legal Assistant</title>
+  
+  <!-- React & ReactDOM -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <!-- Babel for JSX -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #0A1F44;
+      --accent: #FF6A00;
+      --secondary: #1E8F4E;
+      --bg-dark: #0f172a;
+      --surface: rgba(30, 41, 59, 0.7);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #050b14, #0f172a);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Desktop constraint to look like mobile */
+    .app-container {
+      width: 100%;
+      max-width: 400px;
+      height: 100vh;
+      max-height: 850px;
+      background: var(--bg-dark);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+    
+    @media (min-width: 450px) {
+      .app-container {
+        height: 90vh;
+        border-radius: 40px;
+        border: 8px solid #1e293b;
+      }
+      .notch {
+        position: absolute;
+        top: 0; left: 50%; transform: translateX(-50%);
+        width: 120px; height: 25px; background: #1e293b;
+        border-bottom-left-radius: 15px; border-bottom-right-radius: 15px;
+        z-index: 10;
+      }
+    }
+
+    .app-bar {
+      padding: 40px 20px 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(10, 31, 68, 0.8);
+      backdrop-filter: blur(10px);
+      z-index: 5;
+    }
+    
+    @media (max-width: 449px) {
+      .app-bar { padding-top: 20px; }
+      .notch { display: none; }
+    }
+
+    .app-bar-title {
+      font-weight: bold;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+
+    .content {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      scrollbar-width: none;
+      display: flex;
+      flex-direction: column;
+    }
+    .content::-webkit-scrollbar { display: none; }
+
+    .card {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(255,255,255,0.05);
+      backdrop-filter: blur(10px);
+    }
+
+    .glass-btn {
+      background: rgba(255, 106, 0, 0.2);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      padding: 12px;
+      border-radius: 12px;
+      text-align: center;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .glass-btn.primary { background: var(--accent); color: white; }
+    .glass-btn:hover { box-shadow: 0 0 15px rgba(255, 106, 0, 0.4); }
+
+    /* Setup Screen */
+    .setup-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; }
+    .setup-input { width: 100%; padding: 12px; border-radius: 8px; border: none; margin-bottom: 20px; outline: none; }
+
+    /* Screen 1: Home */
+    .quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .action-item {
+      background: rgba(30, 143, 78, 0.1); border: 1px solid rgba(30, 143, 78, 0.3);
+      border-radius: 12px; padding: 15px; text-align: center; cursor: pointer; transition: all 0.2s;
+    }
+    .action-item:hover { background: rgba(30, 143, 78, 0.2); transform: translateY(-2px); }
+    .action-item i { font-size: 24px; color: var(--secondary); margin-bottom: 8px; display: block; }
+
+    /* Language Pills */
+    .lang-pills { display: flex; gap: 8px; margin-bottom: 20px; }
+    .lang-pill {
+      flex: 1; padding: 8px 4px; border-radius: 20px; text-align: center;
+      font-size: 0.8rem; font-weight: 600; cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.05);
+      color: var(--text-muted);
+      transition: all 0.25s;
+    }
+    .lang-pill.active {
+      background: var(--accent); color: white;
+      border-color: var(--accent);
+      box-shadow: 0 0 12px rgba(255,106,0,0.4);
+    }
+    .lang-pill:hover:not(.active) { background: rgba(255,255,255,0.1); color: var(--text-main); }
+
+    /* Screen 2: Chat */
+    .chat-bubble { max-width: 85%; padding: 12px 16px; border-radius: 16px; margin-bottom: 16px; font-size: 0.95rem; line-height: 1.5; }
+    .chat-ai { background: var(--surface); border-top-left-radius: 4px; align-self: flex-start; }
+    .chat-user { background: var(--primary); border-top-right-radius: 4px; align-self: flex-end; margin-left: auto; }
+    .chat-input-area { padding: 15px; background: #1e293b; display: flex; gap: 10px; align-items: center; }
+    .chat-input { flex: 1; background: rgba(255,255,255,0.1); border: none; border-radius: 20px; padding: 12px 15px; color: white; outline: none; }
+    .mic-btn {
+      background: var(--accent); width: 44px; height: 44px; border-radius: 50%; border: none; color: white;
+      display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s;
+    }
+    .mic-btn.listening { background: #ff4d4d; animation: pulse 1.5s infinite; }
+
+    /* Bottom Nav */
+    .bottom-nav {
+      display: flex; justify-content: space-around; background: #1e293b; padding: 15px 10px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; color: var(--text-muted); cursor: pointer; font-size: 0.75rem; gap: 4px;
+    }
+    .nav-item.active { color: var(--accent); }
+    .nav-item i { font-size: 1.2rem; }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(255, 77, 77, 0.7); }
+      70% { box-shadow: 0 0 0 20px rgba(255, 77, 77, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 77, 77, 0); }
+    }
+    
+    .loading-dots:after {
+      content: '.';
+      animation: dots 1.5s steps(5, end) infinite;
+    }
+    @keyframes dots { 0%, 20% { color: rgba(0,0,0,0); text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0);} 40% { color: white; text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0);} 60% { text-shadow: .25em 0 0 white, .5em 0 0 rgba(0,0,0,0);} 80%, 100% { text-shadow: .25em 0 0 white, .5em 0 0 white;}}
+
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // ── UI Translations ──────────────────────────────────────────────
+    const T = {
+      English: {
+        greeting: 'Good Morning!', subtitle: 'How can we assist with your legal rights today?',
+        askAI: 'Ask AI Legal Assistant', startChat: 'Start Chat',
+        exampleQ: '"What are my rights if stopped by traffic police?"',
+        knowRights: 'Know Your Rights',
+        actions: ['Traffic Laws','Workplace','Consumer','Rent and Lease'],
+        actionQueries: [
+          'What are my rights regarding traffic laws and police stops?',
+          'What are my rights against workplace harassment or sudden termination?',
+          'What are my rights as a consumer if I am sold a defective product?',
+          'What are my rights as a tenant regarding eviction and security deposits?'
+        ],
+        typeMsg: 'Type a message...', analyzing: 'Analyzing',
+        eviction: 'Eviction Notice?', complaint: 'File complaint',
+        home: 'Home', assistant: 'Assistant', settings: 'Settings',
+      },
+      Hindi: {
+        greeting: 'सुप्रभात!', subtitle: 'आज आपके कानूनी अधिकारों में हम कैसे मदद करें?',
+        askAI: 'AI कानूनी सहायक से पूछें', startChat: 'चैट शुरू करें',
+        exampleQ: '"ट्रैफिक पुलिस ने रोका तो मेरे क्या अधिकार हैं?"',
+        knowRights: 'अपने अधिकार जानें',
+        actions: ['यातायात कानून','कार्यस्थल','उपभोक्ता','किराया और पट्टा'],
+        actionQueries: [
+          'यातायात कानूनों और पुलिस रुकावट के बारे में मेरे क्या अधिकार हैं?',
+          'कार्यस्थल उत्पीड़न या अचानक नौकरी जाने पर मेरे क्या अधिकार हैं?',
+          'खराब उत्पाद बेचे जाने पर उपभोक्ता के रूप में मेरे क्या अधिकार हैं?',
+          'बेदखली और सुरक्षा जमा के बारे में किरायेदार के रूप में मेरे क्या अधिकार हैं?'
+        ],
+        typeMsg: 'संदेश टाइप करें...', analyzing: 'विश्लेषण हो रहा है',
+        eviction: 'बेदखली नोटिस?', complaint: 'शिकायत दर्ज करें',
+        home: 'होम', assistant: 'सहायक', settings: 'सेटिंग्स',
+      },
+      Kannada: {
+        greeting: 'ಶುಭೋದಯ!', subtitle: 'ಇಂದು ನಿಮ್ಮ ಕಾನೂನು ಹಕ್ಕುಗಳ ಬಗ್ಗೆ ನಾವು ಹೇಗೆ ಸಹಾಯ ಮಾಡಬಹುದು?',
+        askAI: 'AI ಕಾನೂನು ಸಹಾಯಕನನ್ನು ಕೇಳಿ', startChat: 'ಚಾಟ್ ಪ್ರಾರಂಭಿಸಿ',
+        exampleQ: '"ಟ್ರಾಫಿಕ್ ಪೊಲೀಸ್ ನಿಲ್ಲಿಸಿದರೆ ನನ್ನ ಹಕ್ಕುಗಳೇನು?"',
+        knowRights: 'ನಿಮ್ಮ ಹಕ್ಕುಗಳನ್ನು ತಿಳಿಯಿರಿ',
+        actions: ['ಸಂಚಾರ ಕಾನೂನು','ಕಾರ್ಯಸ್ಥಳ','ಗ್ರಾಹಕ','ಬಾಡಿಗೆ ಮತ್ತು ಗುತ್ತಿಗೆ'],
+        actionQueries: [
+          'ಸಂಚಾರ ಕಾನೂನುಗಳು ಮತ್ತು ಪೊಲೀಸ್ ನಿಲ್ಲಿಸುವಿಕೆಯ ಬಗ್ಗೆ ನನ್ನ ಹಕ್ಕುಗಳೇನು?',
+          'ಕಾರ್ಯಸ್ಥಳ ಕಿರುಕುಳ ಅಥವಾ ಹಠಾತ್ ವಜಾ ವಿರುದ್ಧ ನನ್ನ ಹಕ್ಕುಗಳೇನು?',
+          'ದೋಷಪೂರಿತ ಉತ್ಪನ್ನ ಮಾರಾಟ ಮಾಡಿದರೆ ಗ್ರಾಹಕನಾಗಿ ನನ್ನ ಹಕ್ಕುಗಳೇನು?',
+          'ಹೊರಹಾಕುವಿಕೆ ಮತ್ತು ಭದ್ರತಾ ಠೇವಣಿ ಬಗ್ಗೆ ಬಾಡಿಗೆದಾರನಾಗಿ ನನ್ನ ಹಕ್ಕುಗಳೇನು?'
+        ],
+        typeMsg: 'ಸಂದೇಶ ಟೈಪ್ ಮಾಡಿ...', analyzing: 'ವಿಶ್ಲೇಷಿಸಲಾಗುತ್ತಿದೆ',
+        eviction: 'ಹೊರಹಾಕುವಿಕೆ ನೋಟಿಸ್?', complaint: 'ದೂರು ದಾಖಲಿಸಿ',
+        home: 'ಮುಖಪುಟ', assistant: 'ಸಹಾಯಕ', settings: 'ಸೆಟ್ಟಿಂಗ್‌ಗಳು',
+      }
+    };
+
+    const LANGS = [
+      { key: 'English', label: 'EN · English' },
+      { key: 'Hindi',   label: 'हि · Hindi'   },
+      { key: 'Kannada', label: 'ಕ · Kannada'  },
+    ];
+
+    const App = () => {
+      const [screen, setScreen] = useState('HOME');
+      const [language, setLanguage] = useState('English');
+
+      const t = T[language];
+
+      const [chatHistory, setChatHistory] = useState([
+        { role: 'ai', text: 'Hello! I am BharatLens, your AI Legal Assistant. How can I help you today?' }
+      ]);
+      const [inputText, setInputText] = useState('');
+      const [isLoading, setIsLoading] = useState(false);
+      const [isListening, setIsListening] = useState(false);
+      
+      const recognitionRef = useRef(null);
+      const chatEndRef = useRef(null);
+
+      // Auto-scroll chat
+      useEffect(() => {
+        if(screen === 'CHAT' && chatEndRef.current) {
+          chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, [chatHistory, screen, isLoading]);
+
+      // Speech Recognition Setup
+      useEffect(() => {
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+          const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+          recognitionRef.current = new SpeechRecognition();
+          recognitionRef.current.continuous = false;
+          recognitionRef.current.interimResults = true;
+
+          recognitionRef.current.onresult = (event) => {
+            let finalTranscript = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+              if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
+            }
+            if (finalTranscript) {
+              setInputText(prev => prev ? `${prev} ${finalTranscript}` : finalTranscript);
+            }
+          };
+          recognitionRef.current.onerror = () => setIsListening(false);
+          recognitionRef.current.onend = () => setIsListening(false);
+        }
+      }, []);
+
+      const toggleListening = () => {
+        if (isListening) {
+          recognitionRef.current?.stop();
+          setIsListening(false);
+        } else {
+          if (recognitionRef.current) {
+            let locale = 'en-IN';
+            if (language === 'Hindi') locale = 'hi-IN';
+            else if (language === 'Kannada') locale = 'kn-IN';
+
+            recognitionRef.current.lang = locale;
+            recognitionRef.current.start();
+            setIsListening(true);
+          } else {
+            alert("Your browser doesn't support voice input.");
+          }
+        }
+      };
+
+      const sendQuery = async (queryText) => {
+        if (!queryText.trim()) return;
+        
+        // Add user message
+        setChatHistory(prev => [...prev, { role: 'user', text: queryText }]);
+        setInputText('');
+        setIsLoading(true);
+        setScreen('CHAT');
+
+        try {
+          // Call our secure backend proxy instead of Gemini directly
+          const response = await fetch('http://localhost:5000/api/analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query: queryText, language })
+          });
+
+          if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.error || 'Backend request failed');
+          }
+
+          const data = await response.json();
+          setChatHistory(prev => [...prev, { role: 'ai', text: data.text }]);
+        } catch (err) {
+          console.error(err);
+          setChatHistory(prev => [...prev, { role: 'ai', text: `⚠️ Error: ${err.message}. Make sure the backend is running on http://localhost:5000` }]);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      const handleQuickAction = (actionText) => {
+        sendQuery(actionText);
+      };
+
+      // --- Views ---
+
+      const renderSetup = () => (
+        <div className="setup-screen">
+          <i className="fa-solid fa-shield-halved fa-4x" style={{color: 'var(--accent)', marginBottom: '20px'}}></i>
+          <h1 style={{marginBottom: '10px'}}>BharatLens</h1>
+          <p style={{color: 'var(--text-muted)', marginBottom: '30px'}}>Your AI Legal Rights Assistant</p>
+          
+          <div style={{width: '100%', textAlign: 'left'}}>
+            <label style={{fontSize: '0.9rem', color: 'var(--text-muted)'}}>Preferred Language</label>
+            <select className="setup-input" value={language} onChange={e => setLanguage(e.target.value)}>
+              <option value="English">English</option>
+              <option value="Hindi">हिंदी (Hindi)</option>
+              <option value="Kannada">ಕನ್ನಡ (Kannada)</option>
+            </select>
+          </div>
+          
+          <div className="glass-btn primary" style={{width: '100%'}} onClick={() => setScreen('HOME')}>Get Started</div>
+        </div>
+      );
+
+      const icons = ['fa-car-burst','fa-building-shield','fa-cart-shopping','fa-file-contract'];
+
+      const renderHome = () => (
+        <>
+          {/* Language Pills */}
+          <div className="lang-pills" style={{marginTop:'10px'}}>
+            {LANGS.map(l => (
+              <div
+                key={l.key}
+                className={`lang-pill ${language === l.key ? 'active' : ''}`}
+                onClick={() => setLanguage(l.key)}
+              >{l.label}</div>
+            ))}
+          </div>
+
+          <h2 style={{fontSize: '1.4rem'}}>{t.greeting}</h2>
+          <p style={{color: 'var(--text-muted)', marginBottom: '18px'}}>{t.subtitle}</p>
+
+          <div className="card" style={{background: 'linear-gradient(135deg, var(--primary), #1e293b)'}}>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px'}}>
+              <h3 style={{margin: 0, color: '#fff'}}>{t.askAI}</h3>
+              <div className="mic-btn" style={{width: '30px', height: '30px'}} onClick={() => setScreen('CHAT')}><i className="fa-solid fa-microphone"></i></div>
+            </div>
+            <p style={{fontSize: '0.85rem', color: '#cbd5e1', marginBottom: '15px'}}>{t.exampleQ}</p>
+            <div className="glass-btn primary" onClick={() => setScreen('CHAT')}>{t.startChat}</div>
+          </div>
+
+          <h3 style={{fontSize: '1.1rem', margin: '16px 0 10px'}}>{t.knowRights}</h3>
+          <div className="quick-actions">
+            {t.actions.map((label, i) => (
+              <div key={i} className="action-item" onClick={() => handleQuickAction(t.actionQueries[i])}>
+                <i className={`fa-solid ${icons[i]}`}></i>
+                <div style={{fontSize: '0.8rem'}}>{label}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      );
+
+      const renderChat = () => {
+        // Format markdown very basic (bold)
+        const formatText = (text) => {
+          return { __html: text.replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--accent)">$1</strong>').replace(/\n/g, '<br/>') };
+        };
+
+        return (
+          <>
+            <div style={{flex: 1, display: 'flex', flexDirection: 'column'}}>
+              {chatHistory.map((msg, idx) => (
+                <div key={idx} className={`chat-bubble ${msg.role === 'ai' ? 'chat-ai' : 'chat-user'}`}>
+                  {msg.role === 'ai' ? (
+                    <div dangerouslySetInnerHTML={formatText(msg.text)} />
+                  ) : (
+                    msg.text
+                  )}
+                </div>
+              ))}
+              {isLoading && (
+                <div className="chat-bubble chat-ai">
+                  <span className="loading-dots">{t.analyzing}</span>
+                </div>
+              )}
+              <div ref={chatEndRef} />
+            </div>
+
+            <div style={{display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '10px', paddingTop: '10px', scrollbarWidth: 'none', borderTop: '1px solid rgba(255,255,255,0.05)'}}>
+              <div onClick={() => sendQuery(t.actionQueries[3])} style={{background: 'rgba(255,255,255,0.1)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.8rem', whiteSpace: 'nowrap', cursor: 'pointer'}}>{t.eviction}</div>
+              <div onClick={() => sendQuery(t.actionQueries[2])} style={{background: 'rgba(255,255,255,0.1)', padding: '6px 12px', borderRadius: '20px', fontSize: '0.8rem', whiteSpace: 'nowrap', cursor: 'pointer'}}>{t.complaint}</div>
+            </div>
+          </>
+        );
+      };
+
+      return (
+        <div className="app-container">
+          <div className="notch"></div>
+          
+          <div className="app-bar">
+            <div className="app-bar-title" onClick={() => setScreen('HOME')}>
+              <i className="fa-solid fa-shield-halved" style={{color: 'var(--accent)'}}></i> BharatLens
+            </div>
+            <div style={{display: 'flex', gap: '15px', alignItems: 'center'}}>
+              <span style={{fontSize: '0.8rem', color: 'var(--text-muted)'}}>{language}</span>
+              <i className="fa-solid fa-gear" onClick={() => setScreen('SETUP')} style={{cursor: 'pointer', color: 'var(--text-muted)'}}></i>
+            </div>
+          </div>
+
+          <div className="content">
+            {screen === 'SETUP' && renderSetup()}
+            {screen === 'HOME' && renderHome()}
+            {screen === 'CHAT' && renderChat()}
+          </div>
+          {/* Backend status indicator */}
+          {screen === 'HOME' && (
+            <div style={{textAlign:'center', padding:'4px 0 8px', fontSize:'0.7rem', color:'#334155'}}>
+              🔗 Backend: http://localhost:5000
+            </div>
+          )}
+
+          {screen === 'CHAT' && (
+            <div className="chat-input-area">
+              <input
+                type="text"
+                className="chat-input"
+                placeholder={t.typeMsg}
+                value={inputText}
+                onChange={e => setInputText(e.target.value)}
+                onKeyDown={e => { if(e.key === 'Enter') sendQuery(inputText) }}
+              />
+              {inputText ? (
+                <button className="mic-btn" onClick={() => sendQuery(inputText)}><i className="fa-solid fa-paper-plane"></i></button>
+              ) : (
+                <button className={`mic-btn ${isListening ? 'listening' : ''}`} onClick={toggleListening}><i className={`fa-solid ${isListening ? 'fa-microphone-slash' : 'fa-microphone'}`}></i></button>
+              )}
+            </div>
+          )}
+
+          <div className="bottom-nav">
+            <div className={`nav-item ${screen === 'HOME' ? 'active' : ''}`} onClick={() => setScreen('HOME')}>
+              <i className="fa-solid fa-house"></i>
+              <span>{t.home}</span>
+            </div>
+            <div className={`nav-item ${screen === 'CHAT' ? 'active' : ''}`} onClick={() => setScreen('CHAT')}>
+              <i className="fa-solid fa-message"></i>
+              <span>{t.assistant}</span>
+            </div>
+            <div className={`nav-item ${screen === 'SETUP' ? 'active' : ''}`} onClick={() => setScreen('SETUP')}>
+              <i className="fa-solid fa-gear"></i>
+              <span>{t.settings}</span>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>

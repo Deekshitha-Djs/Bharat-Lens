@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BharatLens Cinematic Intro</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #050b14;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1000px;
+        }
+
+        /* Light Streaks */
+        .streaks-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            animation: fadeInStreaks 2s ease-in forwards;
+        }
+
+        .streak {
+            position: absolute;
+            top: 50%;
+            left: -100%;
+            width: 200%;
+            height: 2px;
+            filter: blur(8px);
+            transform: translateY(-50%) rotate(-15deg);
+        }
+
+        .saffron { background: linear-gradient(90deg, transparent, #FF6A00, transparent); animation: slideStreak 3s ease-out infinite; top: 40%; }
+        .white { background: linear-gradient(90deg, transparent, #FFFFFF, transparent); animation: slideStreak 3.5s ease-out infinite; top: 50%; }
+        .green { background: linear-gradient(90deg, transparent, #1E8F4E, transparent); animation: slideStreak 4s ease-out infinite; top: 60%; }
+
+        /* Shield */
+        .shield-container {
+            position: absolute;
+            width: 150px;
+            height: 180px;
+            opacity: 0;
+            transform: scale(0.5) translateZ(-500px);
+            animation: revealShield 2.5s cubic-bezier(0.1, 0.9, 0.2, 1) forwards 1s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .shield {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px 10px 75px 75px;
+            box-shadow: 0 0 30px rgba(10, 31, 68, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .shield::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -50%; width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent);
+            transform: skewX(-20deg);
+            animation: shine 3s infinite;
+        }
+
+        /* Magnifying Glass & Chakra */
+        .lens {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border: 4px solid #0A1F44;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            animation: revealLens 2s forwards 2s;
+        }
+
+        .lens-handle {
+            position: absolute;
+            bottom: -25px;
+            right: -25px;
+            width: 30px;
+            height: 6px;
+            background: #0A1F44;
+            transform: rotate(45deg);
+            border-radius: 3px;
+        }
+
+        .chakra {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #0A1F44;
+            position: relative;
+            animation: spin 10s linear infinite;
+        }
+
+        .spoke {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 1px;
+            height: 100%;
+            background: #0A1F44;
+            transform-origin: center;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Generate 24 spokes via JS or CSS. Let's do a few for effect in pure CSS */
+        .chakra::before, .chakra::after {
+            content: ''; position: absolute; top: 50%; left: 50%;
+            width: 1px; height: 100%; background: #0A1F44;
+            transform: translate(-50%, -50%);
+        }
+        .chakra::after { transform: translate(-50%, -50%) rotate(90deg); }
+
+        /* Justice Scale */
+        .scale-container {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            opacity: 0;
+            animation: revealScale 2s forwards 3s;
+        }
+        
+        .scale-base {
+            position: absolute;
+            bottom: 10px; left: 50%; transform: translateX(-50%);
+            width: 40px; height: 4px; background: #FF6A00;
+        }
+        .scale-pillar {
+            position: absolute;
+            bottom: 14px; left: 50%; transform: translateX(-50%);
+            width: 4px; height: 60px; background: #FF6A00;
+        }
+        .scale-beam {
+            position: absolute;
+            top: 10px; left: 50%; transform: translateX(-50%);
+            width: 70px; height: 4px; background: #FF6A00;
+        }
+        .scale-pan-left, .scale-pan-right {
+            position: absolute;
+            top: 14px;
+            width: 20px; height: 10px;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+            border: 2px solid #FF6A00;
+            border-top: none;
+        }
+        .scale-pan-left { left: 5px; }
+        .scale-pan-right { right: 5px; }
+        
+        /* Text Reveal */
+        .text-container {
+            position: absolute;
+            bottom: 20%;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: revealText 2s forwards 4.5s;
+        }
+
+        .title {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin: 0;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(255,255,255,0.3);
+            background: linear-gradient(45deg, #FF6A00, #FFFFFF, #1E8F4E);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            color: #aaaaaa;
+            margin-top: 10px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        /* Animations */
+        @keyframes fadeInStreaks { to { opacity: 0.3; } }
+        @keyframes slideStreak { 0% { left: -100%; } 100% { left: 100%; } }
+        @keyframes revealShield {
+            to { opacity: 1; transform: scale(1) translateZ(0); }
+        }
+        @keyframes shine { 0% { left: -50%; } 100% { left: 150%; } }
+        @keyframes revealLens { to { opacity: 1; } }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes revealScale { to { opacity: 1; } }
+        @keyframes revealText { to { opacity: 1; transform: translateY(0); } }
+
+        /* Camera Zoom */
+        .camera-zoom {
+            width: 100%; height: 100%;
+            animation: cameraZoom 8s ease-in-out forwards;
+        }
+        @keyframes cameraZoom {
+            0% { transform: scale(0.9); }
+            100% { transform: scale(1.1); }
+        }
+
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="camera-zoom">
+        <div class="container">
+            <div class="streaks-container">
+                <div class="streak saffron"></div>
+                <div class="streak white"></div>
+                <div class="streak green"></div>
+            </div>
+
+            <div class="shield-container">
+                <div class="shield"></div>
+                
+                <div class="scale-container">
+                    <div class="scale-base"></div>
+                    <div class="scale-pillar"></div>
+                    <div class="scale-beam"></div>
+                    <div class="scale-pan-left"></div>
+                    <div class="scale-pan-right"></div>
+                </div>
+
+                <div class="lens">
+                    <div class="lens-handle"></div>
+                    <div class="chakra" id="chakra">
+                        <!-- Spokes generated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-container">
+                <h1 class="title">BharatLens</h1>
+                <p class="tagline">Your AI Legal Rights Assistant</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Generate Chakra spokes
+    const chakra = document.getElementById('chakra');
+    for (let i = 0; i < 12; i++) {
+        let spoke = document.createElement('div');
+        spoke.className = 'spoke';
+        spoke.style.transform = `translate(-50%, -50%) rotate(${i * 15}deg)`;
+        chakra.appendChild(spoke);
+    }
+
+    // 🎬 Cinematic ending + redirect
+    setTimeout(() => {
+        document.body.style.transition = "opacity 1.5s ease";
+        document.body.style.opacity = "0";
+
+        setTimeout(() => {
+            window.location.href = "bharatlens_demo.html"; 
+            // 👆 change this if your main file name is different
+        }, 1500);
+
+    }, 7000); // total intro duration (7s)
+</script>
+<script>
+    setTimeout(() => {
+    window.location.href = "bharatlens_demo.html"; // Redirect to main page after intro
+    }, 9000); // Redirect after 9 seconds (intro + fade out)
+</script>
+</body>
+</html>
