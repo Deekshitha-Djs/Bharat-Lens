@@ -1,22 +1,55 @@
-# BharatLens — AI Legal Awareness for India 🇮🇳
+# 🇮🇳 BharatLens
 
-BharatLens helps Indian citizens understand their legal rights using AI.
-Supports **English, Hindi, and Kannada**.
+**BharatLens** is an AI-powered legal awareness platform designed to help users understand their rights in real-world situations.
+It combines an interactive UI, a cinematic intro experience, and backend logic to deliver an engaging and informative tool.
+It is available in kannada, english and hindi.
+---
+
+## ✨ Features
+
+* 🎬 **Cinematic Intro Experience**
+  Immersive entry animation before accessing the app
+
+* ⚖️ **Legal Awareness Interface**
+  Simple UI to explore rights and scenarios
+
+* 🧠 **Backend Support**
+  Node.js-powered backend for handling logic and APIs
+
+* 🔍 **AI Assistance (Planned/Integrated)**
+  Helps users understand legal rights in different situations
 
 ---
 
-## ✅ Prerequisites
+## 📁 Project Structure
 
-1. Install **Node.js** from https://nodejs.org/ (choose the LTS version)
-2. Restart your terminal/command prompt after installing
+```
+Bharat-Lens/
+│
+├── backend/        # Node.js server
+├── frontend/       # UI (HTML / React / Vite)
+├── functions/      # Firebase / cloud functions (if used)
+│
+├── cinematic_intro.html   # Entry animation
+├── bharatlens_demo.html   # Main UI
+├── ui_mockups.html        # UI previews
+├── README.md
+```
 
 ---
 
-## 🚀 How to Run (2 steps)
+## ⚙️ Setup & Run Locally
 
-### Step 1 — Start the Backend
+### 1️⃣ Clone the repository
 
-Open a terminal, navigate to the `backend` folder, and run:
+```bash
+git clone https://github.com/Deekshitha-Djs/Bharat-Lens.git
+cd Bharat-Lens
+```
+
+---
+
+### 2️⃣ Start Backend
 
 ```bash
 cd backend
@@ -24,33 +57,60 @@ npm install
 node server.js
 ```
 
-You should see:
+Server will run on:
+
 ```
-✅  BharatLens backend running on http://localhost:5000
+http://localhost:5000
 ```
-
-**Keep this terminal open.**
-
-### Step 2 — Open the App
-
-Simply double-click `bharatlens_demo.html` to open it in your browser.
-
-That's it! 🎉
 
 ---
 
-## 💡 Features
+### 3️⃣ Open Frontend
 
-- 🗣️ **Voice Input** — Speak your legal query
-- 🌐 **Multilingual** — English, Hindi (हिंदी), Kannada (ಕನ್ನಡ)
-- ⚡ **Instant Language Switch** — Click language pills on the home screen
-- 🤖 **AI Legal Analysis** — Powered by Google Gemini
-- 📱 **Mobile-first UI** — Looks like a real mobile app
+Open in browser:
+
+```
+cinematic_intro.html
+```
+
+👉 This will:
+
+* Play intro animation
+* Redirect to main UI
 
 ---
 
-## ⚠️ Notes
+## ⚠️ Important Notes
 
-- The backend must be running (`node server.js`) before you use the app.
-- The API key is already included in `backend/.env` — no setup needed.
-- Tested on Chrome and Edge. Use a modern browser for best results.
+* Do **not upload**:
+
+  * `node_modules/`
+  * `.env` files
+
+* Install dependencies using:
+
+```bash
+npm install
+```
+
+---
+
+## 🚀 Future Improvements
+
+* 🌐 Deploy as a live web app
+* 🤖 Enhance AI legal assistance
+* 📱 Mobile responsiveness
+* 🔐 Authentication system
+
+---
+
+## 👩‍💻 Author
+
+**Deekshitha J**
+GitHub: https://github.com/Deekshitha-Djs
+
+---
+
+## 📜 License
+
+This project is for educational and development purposes.
